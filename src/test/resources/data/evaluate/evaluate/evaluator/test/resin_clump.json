@@ -1,0 +1,8 @@
+{
+  "type": "evaluate:constant",
+  "item": {
+    "type": "saturn:regex",
+    "pattern": "minecraft:resin_clump"
+  },
+  "value": 12.5
+}

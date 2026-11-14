@@ -1,0 +1,5 @@
+{
+  "type": "evaluate:constant",
+  "item": "#minecraft:creeper_drop_music_discs",
+  "value": 2048
+}

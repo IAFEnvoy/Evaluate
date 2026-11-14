@@ -1,0 +1,14 @@
+{
+  "type": "evaluate:constant",
+  "item": {
+    "type": "saturn:ingredient",
+    "ingredient": {
+      "neoforge:ingredient_type": "neoforge:components",
+      "items": "minecraft:goat_horn",
+      "components": {
+        "minecraft:instrument": "minecraft:seek_goat_horn"
+      }
+    }
+  },
+  "value": 96
+}

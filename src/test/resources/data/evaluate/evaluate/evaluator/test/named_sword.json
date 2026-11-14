@@ -1,0 +1,15 @@
+{
+  "type": "evaluate:constant",
+  "item": {
+    "type": "saturn:ingredient",
+    "ingredient": {
+      "neoforge:ingredient_type": "neoforge:components",
+      "items": "minecraft:diamond_sword",
+      "components": {
+        "minecraft:custom_name": "VALUED"
+      }
+    }
+  },
+  "value": 909,
+  "priority": 30
+}

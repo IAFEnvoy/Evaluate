@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "evaluate_tests:quest_token", "evaluate_tests:quest_token", "evaluate_tests:quest_token",
+    "evaluate_tests:quest_token", "evaluate_tests:quest_token", "evaluate_tests:quest_token",
+    "evaluate_tests:quest_token", "evaluate_tests:quest_token", "evaluate_tests:quest_token"
+  ],
+  "result": { "id": "evaluate_tests:quest_block", "count": 1 }
+}

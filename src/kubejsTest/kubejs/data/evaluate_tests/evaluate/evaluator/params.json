@@ -1,0 +1,5 @@
+{
+  "type": "evaluate:js",
+  "id": "evaluate_tests:params",
+  "params": { "item": ["minecraft:rabbit_hide"], "value": 31.5 }
+}

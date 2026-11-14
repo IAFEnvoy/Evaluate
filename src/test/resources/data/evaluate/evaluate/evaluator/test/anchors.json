@@ -1,0 +1,9 @@
+{
+  "type": "evaluate:constant",
+  "item": [
+    "minecraft:apple",
+    "#evaluate_tests:anchors"
+  ],
+  "value": 77,
+  "priority": 10
+}

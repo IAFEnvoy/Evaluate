@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": ["minecraft:resin_clump"],
+  "result": {"id": "minecraft:resin_brick", "count": 2}
+}

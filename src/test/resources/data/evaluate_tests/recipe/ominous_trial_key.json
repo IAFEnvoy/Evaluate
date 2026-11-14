@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:blasting",
+  "ingredient": "minecraft:resin_clump",
+  "result": {"id": "minecraft:ominous_trial_key", "count": 2},
+  "experience": 0,
+  "cookingtime": 100
+}

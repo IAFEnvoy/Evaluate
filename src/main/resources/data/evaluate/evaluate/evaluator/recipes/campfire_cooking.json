@@ -1,0 +1,5 @@
+{
+  "type": "evaluate:recipe",
+  "recipe_type": "minecraft:campfire_cooking",
+  "extra_value": 0.0
+}

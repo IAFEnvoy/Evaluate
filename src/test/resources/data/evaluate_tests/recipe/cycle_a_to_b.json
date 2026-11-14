@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": ["evaluate_tests:cycle_a"],
+  "result": { "id": "evaluate_tests:cycle_b", "count": 2 }
+}

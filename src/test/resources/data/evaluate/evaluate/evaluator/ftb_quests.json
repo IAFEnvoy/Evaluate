@@ -1,0 +1,5 @@
+{
+  "type": "evaluate:ftb_quests",
+  "repeatable_only": true,
+  "extra_value": 2
+}

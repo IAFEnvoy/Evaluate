@@ -1,0 +1,8 @@
+{
+  "type": "evaluate:constant",
+  "item": {
+    "type": "saturn:item",
+    "item": "minecraft:diamond"
+  },
+  "value": 10000
+}

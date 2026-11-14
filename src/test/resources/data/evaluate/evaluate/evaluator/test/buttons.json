@@ -1,0 +1,9 @@
+{
+  "type": "evaluate:constant",
+  "item": {
+    "type": "saturn:wildcard",
+    "pattern": "minecraft:*_button"
+  },
+  "value": 33,
+  "priority": 1
+}

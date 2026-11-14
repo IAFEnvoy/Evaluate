@@ -1,0 +1,593 @@
+{
+  "id": "2000000000000001",
+  "group": "",
+  "filename": "evaluate_tests",
+  "consume_items": true,
+  "default_repeatable_quest": true,
+  "quests": [
+    {
+      "id": "2000000000000010",
+      "title": "Aggregate inputs and reward counts",
+      "tasks": [
+        {
+          "id": "2100000000000001",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 1
+        },
+        {
+          "id": "2100000000000002",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "id": "2100000000000003",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_token",
+            "count": 7
+          },
+          "count": 2
+        },
+        {
+          "id": "2100000000000004",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_token"
+          },
+          "count": 2
+        }
+      ],
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "2000000000000020",
+      "title": "Use inferred input",
+      "tasks": [
+        {
+          "id": "2100000000000005",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_token"
+          },
+          "count": 4
+        }
+      ],
+      "rewards": [
+        {
+          "id": "2100000000000006",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_chain"
+          },
+          "count": 2
+        }
+      ],
+      "x": 2.0,
+      "y": 0.0
+    },
+    {
+      "id": "2000000000000030",
+      "title": "Full cost per distinct output",
+      "tasks": [
+        {
+          "id": "2100000000000007",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:gold_ingot"
+          },
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "id": "2100000000000008",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_pair_a"
+          },
+          "count": 2
+        },
+        {
+          "id": "2100000000000009",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_pair_b"
+          },
+          "count": 4
+        }
+      ],
+      "x": 4.0,
+      "y": 0.0
+    },
+    {
+      "id": "2000000000000040",
+      "title": "Ignore optional task",
+      "tasks": [
+        {
+          "id": "210000000000000A",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 1
+        },
+        {
+          "id": "210000000000000B",
+          "type": "ftbquests:checkmark",
+          "optional_task": true
+        }
+      ],
+      "rewards": [
+        {
+          "id": "210000000000000C",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_optional"
+          },
+          "count": 1
+        }
+      ],
+      "x": 6.0,
+      "y": 0.0
+    },
+    {
+      "id": "2000000000000050",
+      "title": "Nonrepeatable opt in",
+      "tasks": [
+        {
+          "id": "210000000000000D",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:gold_ingot"
+          },
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "id": "210000000000000E",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_once"
+          },
+          "count": 2
+        }
+      ],
+      "can_repeat": false,
+      "x": 8.0,
+      "y": 0.0
+    },
+    {
+      "id": "2000000000000060",
+      "title": "Match named component input",
+      "tasks": [
+        {
+          "id": "210000000000000F",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:diamond_sword",
+            "components": {
+              "minecraft:custom_name": "VALUED"
+            }
+          },
+          "count": 1,
+          "match_components": "strict"
+        }
+      ],
+      "rewards": [
+        {
+          "id": "2100000000000010",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_components"
+          },
+          "count": 2
+        }
+      ],
+      "x": 10.0,
+      "y": 0.0
+    },
+    {
+      "id": "2000000000000070",
+      "title": "Ignore configured components when task ignores them",
+      "tasks": [
+        {
+          "id": "2100000000000011",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:diamond_sword",
+            "components": {
+              "minecraft:custom_name": "VALUED"
+            }
+          },
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "id": "2100000000000012",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_no_components"
+          },
+          "count": 1
+        }
+      ],
+      "x": 12.0,
+      "y": 0.0
+    },
+    {
+      "id": "2000000000000080",
+      "title": "Reject collection",
+      "tasks": [
+        {
+          "id": "2100000000000013",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": [
+        {
+          "id": "2100000000000014",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_collection"
+          },
+          "count": 1
+        }
+      ],
+      "x": 14.0,
+      "y": 0.0
+    },
+    {
+      "id": "2000000000000090",
+      "title": "Reject extra required target",
+      "tasks": [
+        {
+          "id": "2100000000000015",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 1
+        },
+        {
+          "id": "2100000000000016",
+          "type": "ftbquests:checkmark"
+        }
+      ],
+      "rewards": [
+        {
+          "id": "2100000000000017",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_mixed_task"
+          },
+          "count": 1
+        }
+      ],
+      "x": 16.0,
+      "y": 0.0
+    },
+    {
+      "id": "20000000000000A0",
+      "title": "Reject randomized count",
+      "tasks": [
+        {
+          "id": "2100000000000018",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "id": "2100000000000019",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_random_bonus"
+          },
+          "count": 1,
+          "random_bonus": 1
+        }
+      ],
+      "x": 18.0,
+      "y": 0.0
+    },
+    {
+      "id": "20000000000000B0",
+      "title": "Reject conditional reward",
+      "tasks": [
+        {
+          "id": "210000000000001A",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "id": "210000000000001B",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_only_one"
+          },
+          "count": 1,
+          "only_one": true
+        }
+      ],
+      "x": 20.0,
+      "y": 0.0
+    },
+    {
+      "id": "20000000000000C0",
+      "title": "Reject choice reward mix",
+      "tasks": [
+        {
+          "id": "210000000000001C",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "id": "210000000000001D",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_choice"
+          },
+          "count": 1
+        },
+        {
+          "id": "210000000000001E",
+          "type": "ftbquests:choice"
+        }
+      ],
+      "x": 22.0,
+      "y": 0.0
+    },
+    {
+      "id": "20000000000000D0",
+      "title": "Reject nonitem reward mix",
+      "tasks": [
+        {
+          "id": "210000000000001F",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "id": "2100000000000020",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_mixed_reward"
+          },
+          "count": 1
+        },
+        {
+          "id": "2100000000000021",
+          "type": "ftbquests:xp",
+          "xp": 5
+        }
+      ],
+      "x": 24.0,
+      "y": 0.0
+    },
+    {
+      "id": "20000000000000E0",
+      "title": "Reject crafting only",
+      "tasks": [
+        {
+          "id": "2100000000000022",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 1,
+          "only_from_crafting": true
+        }
+      ],
+      "rewards": [
+        {
+          "id": "2100000000000023",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_crafting_only"
+          },
+          "count": 1
+        }
+      ],
+      "x": 26.0,
+      "y": 0.0
+    },
+    {
+      "id": "20000000000000F0",
+      "title": "Reject long quantity overflow",
+      "tasks": [
+        {
+          "id": "2100000000000024",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 2147483648
+        }
+      ],
+      "rewards": [
+        {
+          "id": "2100000000000025",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_oversized"
+          },
+          "count": 1
+        }
+      ],
+      "x": 28.0,
+      "y": 0.0
+    },
+    {
+      "id": "2000000000000100",
+      "title": "Reject summed quantity overflow",
+      "tasks": [
+        {
+          "id": "2100000000000026",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 2147483647
+        },
+        {
+          "id": "2100000000000027",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "id": "2100000000000028",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_overflow"
+          },
+          "count": 1
+        }
+      ],
+      "x": 30.0,
+      "y": 0.0
+    },
+    {
+      "id": "2000000000000110",
+      "title": "Unknown is not free",
+      "tasks": [
+        {
+          "id": "2100000000000029",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:water_bucket"
+          },
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "id": "210000000000002A",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_unknown_input"
+          },
+          "count": 1
+        }
+      ],
+      "x": 32.0,
+      "y": 0.0
+    },
+    {
+      "id": "2000000000000120",
+      "title": "Reject all optional",
+      "tasks": [
+        {
+          "id": "210000000000002B",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 1,
+          "optional_task": true
+        }
+      ],
+      "rewards": [
+        {
+          "id": "210000000000002C",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_all_optional"
+          },
+          "count": 1
+        }
+      ],
+      "x": 34.0,
+      "y": 0.0
+    },
+    {
+      "id": "2000000000000130",
+      "title": "Reject missing input",
+      "tasks": [
+        {
+          "id": "210000000000002D",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:missing_mod_item"
+          },
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "id": "210000000000002E",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "evaluate_tests:quest_missing_item"
+          },
+          "count": 1
+        }
+      ],
+      "x": 36.0,
+      "y": 0.0
+    },
+    {
+      "id": "2000000000000150",
+      "title": "Protect explicit base",
+      "tasks": [
+        {
+          "id": "210000000000002F",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:iron_ingot"
+          },
+          "count": 1
+        }
+      ],
+      "rewards": [
+        {
+          "id": "2100000000000030",
+          "type": "ftbquests:item",
+          "item": {
+            "id": "minecraft:diamond"
+          },
+          "count": 64
+        }
+      ],
+      "x": 38.0,
+      "y": 0.0
+    }
+  ]
+}

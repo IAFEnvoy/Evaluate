@@ -1,0 +1,9 @@
+{
+  "type": "evaluate:constant",
+  "item": {
+    "type": "saturn:regex",
+    "pattern": "minecraft:(oak|spruce)_button"
+  },
+  "value": 44,
+  "priority": 2
+}

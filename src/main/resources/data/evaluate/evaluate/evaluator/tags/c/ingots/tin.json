@@ -1,0 +1,5 @@
+{
+  "type": "evaluate:constant",
+  "item": "#c:ingots/tin",
+  "value": 256
+}
