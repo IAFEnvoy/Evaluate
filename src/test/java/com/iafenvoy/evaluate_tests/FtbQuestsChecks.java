@@ -97,7 +97,7 @@ final class FtbQuestsChecks {
             return;
         }
         MinecraftServer server = helper.getLevel().getServer();
-        Map<ValueKey.Item, Double> beforeReload = ItemValues.all(server);
+        Map<ValueKey.ItemValue, Double> beforeReload = ItemValues.all(server);
         Path path = ServerQuestFile.getInstance().getFolder().resolve("chapters/evaluate_tests.json5");
         try {
             String original = Files.readString(path);
@@ -124,7 +124,7 @@ final class FtbQuestsChecks {
             checkSkipped(helper);
             KubeJSChecks.checkReloaded(helper); // Recalculation must retain callbacks from the current reload.
         }).thenExecute(() -> {
-            Map<ValueKey.Item, Double> beforeEdit = ItemValues.all(server);
+            Map<ValueKey.ItemValue, Double> beforeEdit = ItemValues.all(server);
             // Simulate the cache clear before an editor update, then mutate the live task after the event.
             ServerQuestFile file = ServerQuestFile.getInstance();
             ItemTask task = (ItemTask) file.getQuest(0x2000000000000010L).getTasks().iterator().next();

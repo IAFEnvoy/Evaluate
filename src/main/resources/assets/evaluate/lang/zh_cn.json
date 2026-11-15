@@ -1,3 +1,8 @@
 {
-  "tooltip.evaluate.value": "计算价值：%s"
+  "tooltip.evaluate.value": "计算价值：%s",
+  "commands.evaluate.set": "已将当前存档中 %s 的价值设为 %s",
+  "commands.evaluate.reset": "已重置 %s 的存档价值",
+  "commands.evaluate.invalid_value": "价值必须为有限非负数",
+  "commands.evaluate.empty_item": "不能为空物品设置价值",
+  "commands.evaluate.not_set": "该物品没有可重置的存档专属价值"
 }

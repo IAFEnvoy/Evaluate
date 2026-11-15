@@ -1,5 +1,6 @@
 package com.iafenvoy.evaluate.data;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.iafenvoy.evaluate.Evaluate;
 import com.iafenvoy.evaluate.api.EvaluationContext;
@@ -17,6 +18,7 @@ import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -43,12 +45,13 @@ public final class ValueReloadListener extends SimplePreparableReloadListener<Va
     private Definitions definitions;
     private boolean pending;
     private ValueSnapshot snapshot = ValueSnapshot.EMPTY;
+    private Map<ValueKey.ItemValue, Double> worldValues = Map.of();
 
     public ValueReloadListener(ReloadableServerResources resources) {
         this.resources = resources;
     }
 
-    public Map<ValueKey.Item, Double> values() {
+    public Map<ValueKey.ItemValue, Double> values() {
         return this.snapshot().values();
     }
 
@@ -60,8 +63,17 @@ public final class ValueReloadListener extends SimplePreparableReloadListener<Va
         return this.definitions.overrides();
     }
 
-    public Map<Identifier, BiConsumer<EvaluationContext, JsonObject>> jsCallbacks() {
+    public Map<Identifier, BiConsumer<EvaluationContext, JsonElement>> jsCallbacks() {
         return this.definitions.jsCallbacks();
+    }
+
+    public synchronized ValueSnapshot snapshot(MinecraftServer server) {
+        Map<ValueKey.ItemValue, Double> current = WorldValuesData.get(server).values();
+        if (this.worldValues != current) {
+            this.worldValues = current;
+            this.pending = true;
+        }
+        return this.snapshot();
     }
 
     public synchronized ValueSnapshot snapshot() {
@@ -69,7 +81,7 @@ public final class ValueReloadListener extends SimplePreparableReloadListener<Va
             Map<Identifier, Evaluator> evaluators = new LinkedHashMap<>();
             this.definitions.evaluators().listElements().forEach(holder -> evaluators.put(holder.key().identifier(), holder.value()));
             List<ValueOverride> overrides = this.definitions.overrides().listElements().map(Holder.Reference::value).toList();
-            this.snapshot = DefinitionEvaluator.evaluate(this.resources, evaluators, overrides);
+            this.snapshot = DefinitionEvaluator.evaluate(this.resources, evaluators, overrides, this.worldValues);
             this.pending = false;
         }
         return this.snapshot;
@@ -104,6 +116,6 @@ public final class ValueReloadListener extends SimplePreparableReloadListener<Va
     }
 
     public record Definitions(Registry<Evaluator> evaluators, Registry<ValueOverride> overrides,
-                              Map<Identifier, BiConsumer<EvaluationContext, JsonObject>> jsCallbacks) {
+                              Map<Identifier, BiConsumer<EvaluationContext, JsonElement>> jsCallbacks) {
     }
 }

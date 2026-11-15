@@ -1,3 +1,8 @@
 {
-  "tooltip.evaluate.value": "Evaluated value: %s"
+  "tooltip.evaluate.value": "Evaluated value: %s",
+  "commands.evaluate.set": "Set the value of %s to %s for this world",
+  "commands.evaluate.reset": "Reset the world value of %s",
+  "commands.evaluate.invalid_value": "Value must be finite and non-negative",
+  "commands.evaluate.empty_item": "Cannot set a value for an empty item",
+  "commands.evaluate.not_set": "This item has no world-specific value to reset"
 }

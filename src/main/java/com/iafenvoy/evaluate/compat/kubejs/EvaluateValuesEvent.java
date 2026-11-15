@@ -2,6 +2,7 @@ package com.iafenvoy.evaluate.compat.kubejs;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.iafenvoy.evaluate.Evaluate;
 import dev.latvian.mods.kubejs.event.KubeEvent;
 import dev.latvian.mods.kubejs.generator.KubeDataGenerator;
 import dev.latvian.mods.kubejs.script.KubeJSContext;
@@ -46,7 +47,7 @@ public final class EvaluateValuesEvent implements KubeEvent {
             throw new IllegalArgumentException("Value must be finite and non-negative");
         JsonElement selection = JsonUtils.of(cx, item).deepCopy();
         JsonObject json = new JsonObject();
-        if (registry.equals("evaluator")) json.addProperty("type", "evaluate:constant");
+        if (registry.equals("evaluator")) json.addProperty("type", Evaluate.MOD_ID + ":constant");
         json.add("item", selection);
         json.addProperty("value", value);
         json.addProperty("priority", priority);
@@ -64,7 +65,7 @@ public final class EvaluateValuesEvent implements KubeEvent {
 
     public void js(Identifier entryId, Identifier callbackId, JsonObject params) {
         JsonObject json = new JsonObject();
-        json.addProperty("type", "evaluate:js");
+        json.addProperty("type", Evaluate.MOD_ID + ":js");
         json.addProperty("id", callbackId.toString());
         json.add("params", params.deepCopy());
         this.write(entryId, "evaluator", json);
@@ -78,6 +79,6 @@ public final class EvaluateValuesEvent implements KubeEvent {
     }
 
     private void write(Identifier id, String registry, JsonObject definition) {
-        this.generator.json(id.withPath("evaluate/" + registry + "/" + id.getPath() + ".json"), definition);
+        this.generator.json(id.withPath(Evaluate.MOD_ID + "/" + registry + "/" + id.getPath() + ".json"), definition);
     }
 }

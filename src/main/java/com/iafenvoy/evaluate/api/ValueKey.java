@@ -1,28 +1,31 @@
 package com.iafenvoy.evaluate.api;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 /**
  * Graph identities include component patches, so e.g. water and healing potions stay distinct.
  */
 public sealed interface ValueKey {
-    record Item(Identifier id, DataComponentPatch components) implements ValueKey {
-        public Item(Identifier id) {
-            this(id, DataComponentPatch.EMPTY);
-        }
+    record ItemValue(Item id, DataComponentPatch components) implements ValueKey {
+        public static final Codec<ItemValue> CODEC = RecordCodecBuilder.create(i -> i.group(
+                BuiltInRegistries.ITEM.byNameCodec().fieldOf("id").forGetter(ItemValue::id),
+                DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(ItemValue::components)
+        ).apply(i, ItemValue::new));
 
-        public static Item of(ItemStack stack) {
+        public static ItemValue of(ItemStack stack) {
             if (stack.isEmpty()) throw new IllegalArgumentException("Cannot value an empty stack");
-            return new Item(BuiltInRegistries.ITEM.getKey(stack.getItem()), stack.getComponentsPatch());
+            return new ItemValue(stack.getItem(), stack.getComponentsPatch());
         }
     }
 
     /**
      * Internal alternative group, never exposed as a datapack target.
      */
-    record Group(String id) implements ValueKey {
+    record GroupValue(String id) implements ValueKey {
     }
 }

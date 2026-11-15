@@ -1,24 +1,25 @@
 package com.iafenvoy.evaluate.evaluator;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.iafenvoy.evaluate.Evaluate;
 import com.iafenvoy.evaluate.api.EvaluationContext;
 import com.iafenvoy.evaluate.api.Evaluator;
-import com.iafenvoy.evaluate.data.DefinitionCodecs;
 import com.iafenvoy.evaluate.data.ValueReloadListener;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ExtraCodecs;
 
 import java.util.function.BiConsumer;
 
 /**
  * Data files reference a named callback; callbacks belong to the resource reload that loaded them.
  */
-public record JsEvaluator(Identifier callbackId, JsonObject params) implements Evaluator {
+public record JsEvaluator(Identifier callbackId, JsonElement params) implements Evaluator {
     public static final MapCodec<JsEvaluator> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             Identifier.CODEC.fieldOf("id").forGetter(JsEvaluator::callbackId),
-            DefinitionCodecs.JSON_OBJECT.optionalFieldOf("params", new JsonObject()).forGetter(JsEvaluator::params)
+            ExtraCodecs.JSON.optionalFieldOf("params", new JsonObject()).forGetter(JsEvaluator::params)
     ).apply(i, JsEvaluator::new));
 
     public JsEvaluator {
@@ -27,7 +28,7 @@ public record JsEvaluator(Identifier callbackId, JsonObject params) implements E
 
     @Override
     public void evaluate(EvaluationContext context) {
-        BiConsumer<EvaluationContext, JsonObject> callback = context.resources().getListener(ValueReloadListener.KEY).jsCallbacks().get(this.callbackId);
+        BiConsumer<EvaluationContext, JsonElement> callback = context.resources().getListener(ValueReloadListener.KEY).jsCallbacks().get(this.callbackId);
         if (callback == null) {
             Evaluate.LOGGER.warn("Unknown JS evaluator callback '{}' (KubeJS server script registration required)", this.callbackId);
             return;

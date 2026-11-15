@@ -16,8 +16,8 @@ public final class ItemValues {
     private ItemValues() {
     }
 
-    public static Map<ValueKey.Item, Double> all(MinecraftServer server) {
-        return server.getServerResources().managers().getListener(ValueReloadListener.KEY).values();
+    public static Map<ValueKey.ItemValue, Double> all(MinecraftServer server) {
+        return server.getServerResources().managers().getListener(ValueReloadListener.KEY).snapshot(server).values();
     }
 
     /**
@@ -39,9 +39,9 @@ public final class ItemValues {
     }
 
     /**
-     * Explicit Saturn matchers are evaluated on the actual stack; inferred values use its exact component patch.
+     * World values take precedence. Explicit Saturn matchers use the actual stack; inferred values use its exact component patch.
      */
     public static OptionalDouble get(MinecraftServer server, ItemStack stack) {
-        return server.getServerResources().managers().getListener(ValueReloadListener.KEY).snapshot().get(stack);
+        return server.getServerResources().managers().getListener(ValueReloadListener.KEY).snapshot(server).get(stack);
     }
 }

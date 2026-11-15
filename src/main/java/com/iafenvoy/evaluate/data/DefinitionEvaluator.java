@@ -20,11 +20,11 @@ final class DefinitionEvaluator {
     private DefinitionEvaluator() {
     }
 
-    static ValueSnapshot evaluate(ReloadableServerResources resources, Map<Identifier, Evaluator> evaluators, List<ValueOverride> overrides) {
+    static ValueSnapshot evaluate(ReloadableServerResources resources, Map<Identifier, Evaluator> evaluators, List<ValueOverride> overrides, Map<ValueKey.ItemValue, Double> worldValues) {
         ValueGraph<ValueKey> graph = new ValueGraph<>();
-        Map<ValueKey.Item, ItemStack> candidates = new LinkedHashMap<>();
+        Map<ValueKey.ItemValue, ItemStack> candidates = new LinkedHashMap<>();
         Consumer<ItemStack> collect = stack -> {
-            if (!stack.isEmpty()) candidates.putIfAbsent(ValueKey.Item.of(stack), stack.copyWithCount(1));
+            if (!stack.isEmpty()) candidates.putIfAbsent(ValueKey.ItemValue.of(stack), stack.copyWithCount(1));
         };
         BuiltInRegistries.ITEM.stream().filter(item -> item != Items.AIR).forEach(item -> collect.accept(new ItemStack(item)));
         List<FixedValue> fixedValues = new ArrayList<>();
@@ -32,17 +32,19 @@ final class DefinitionEvaluator {
         overrides.forEach(override -> override.item().collectSamples(collect));
 
         candidates.forEach((key, stack) -> ItemMatcher.find(fixedValues.stream(), stack).ifPresent(d -> graph.setFixed(key, d.value())));
-        Map<ValueKey.Item, Double> result = new LinkedHashMap<>();
+        worldValues.forEach(graph::setFixed);
+        Map<ValueKey.ItemValue, Double> result = new LinkedHashMap<>();
         graph.calculate().forEach((key, value) -> {
-            if (key instanceof ValueKey.Item item) result.put(item, value);
+            if (key instanceof ValueKey.ItemValue item) result.put(item, value);
         });
         candidates.forEach((key, stack) -> ItemMatcher.find(overrides.stream(), stack).ifPresent(override -> {
+            if (worldValues.containsKey(key)) return;
             if (override.value() > 0) result.put(key, override.value());
             else result.remove(key);
         }));
         if (!graph.rejectedCycles().isEmpty())
             Evaluate.LOGGER.warn("Rejected {} nodes in cyclic value groups that exceeded calculation limits", graph.rejectedCycles().size());
         Evaluate.LOGGER.info("Evaluated {} item values from {} datapack evaluators and {} final overrides", result.size(), evaluators.size(), overrides.size());
-        return new ValueSnapshot(result, fixedValues, overrides);
+        return new ValueSnapshot(result, fixedValues, overrides, worldValues);
     }
 }

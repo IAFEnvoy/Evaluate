@@ -40,7 +40,7 @@ public record RecipeEvaluator(RecipeType<?> recipeType, double extraValue) imple
         for (RecipeHolder<?> holder : context.resources().getRecipeManager().getRecipes())
             try {
                 Recipe<?> recipe = holder.value();
-                if (recipe.getType() != this.recipeType || recipe.isSpecial() || !supported(recipe)) continue;
+                if (recipe.getType() != this.recipeType || recipe.isSpecial()) continue;
                 List<Ingredient> ingredients = recipe.placementInfo().ingredients();
                 if (ingredients.isEmpty() || ingredients.stream().anyMatch(i -> i.isCustom() || i.isEmpty())) continue;
                 int variant = 0;
@@ -88,10 +88,5 @@ public record RecipeEvaluator(RecipeType<?> recipeType, double extraValue) imple
                 Evaluate.LOGGER.warn("Skipping value inference for recipe {}: {}", holder.id().identifier(), e.toString());
             }
         Evaluate.LOGGER.debug("Mapped {} {} recipe relationships with extra value {}", mapped, this.recipeType, this.extraValue);
-    }
-
-    private static boolean supported(Recipe<?> recipe) {
-        return recipe instanceof ShapedRecipe || recipe instanceof ShapelessRecipe shapeless && shapeless.result() != null
-                || recipe instanceof SingleItemRecipe || recipe instanceof SmithingTransformRecipe || recipe instanceof TransmuteRecipe;
     }
 }

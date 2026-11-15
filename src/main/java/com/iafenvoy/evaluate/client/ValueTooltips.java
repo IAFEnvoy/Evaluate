@@ -1,9 +1,9 @@
 package com.iafenvoy.evaluate.client;
 
 import com.iafenvoy.evaluate.api.ValueKey;
-import com.iafenvoy.evaluate.network.InvalidateValuesPayload;
-import com.iafenvoy.evaluate.network.ValueRequestPayload;
-import com.iafenvoy.evaluate.network.ValueResponsePayload;
+import com.iafenvoy.evaluate.network.payload.InvalidateValuesPayload;
+import com.iafenvoy.evaluate.network.payload.ValueRequestPayload;
+import com.iafenvoy.evaluate.network.payload.ValueResponsePayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -19,14 +19,14 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
 @EventBusSubscriber(Dist.CLIENT)
 public final class ValueTooltips {
-    private static final ValueQueryCache<ValueKey.Item> VALUES = new ValueQueryCache<>();
+    private static final ValueQueryCache<ValueKey.ItemValue> VALUES = new ValueQueryCache<>();
 
     private ValueTooltips() {
     }
 
     @SubscribeEvent
     public static void registerPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
-        event.register(ValueResponsePayload.TYPE, (payload, context) -> VALUES.receive(payload.requestId(), payload.value()));
+        event.register(ValueResponsePayload.TYPE, (payload, _) -> VALUES.receive(payload.requestId(), payload.value()));
         event.register(InvalidateValuesPayload.TYPE, (payload, context) -> VALUES.clear());
     }
 
@@ -37,7 +37,7 @@ public final class ValueTooltips {
         ClientPacketListener connection = Minecraft.getInstance().getConnection();
         if (connection == null) return;
         ItemStack stack = event.getItemStack();
-        VALUES.get(ValueKey.Item.of(stack), requestId -> ClientPacketDistributor.sendToServer(new ValueRequestPayload(requestId, stack)))
+        VALUES.get(ValueKey.ItemValue.of(stack), requestId -> ClientPacketDistributor.sendToServer(new ValueRequestPayload(requestId, stack)))
                 .ifPresent(value -> event.getToolTip().add(Component.translatable("tooltip.evaluate.value", String.format("%.2f", value))
                         .withStyle(ChatFormatting.DARK_GRAY)));
     }

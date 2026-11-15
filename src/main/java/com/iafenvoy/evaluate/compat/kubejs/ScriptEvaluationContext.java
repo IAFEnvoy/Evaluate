@@ -20,7 +20,6 @@ import java.util.Map;
  * Script-friendly contributions to the same graph used by recipes and Java evaluators.
  */
 public record ScriptEvaluationContext(EvaluationContext context) {
-
     public void set(Context cx, Object item, double value) {
         this.set(cx, item, value, EvaluateValuesEvent.DEFAULT_PRIORITY);
     }

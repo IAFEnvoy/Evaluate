@@ -13,9 +13,6 @@ public final class EvaluateResourceKeys {
     public static final ResourceKey<Registry<Evaluator>> EVALUATOR = key("evaluator");
     public static final ResourceKey<Registry<ValueOverride>> VALUE_OVERRIDE = key("value_override");
 
-    private EvaluateResourceKeys() {
-    }
-
     private static <T> ResourceKey<Registry<T>> key(String path) {
         return ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(Evaluate.MOD_ID, path));
     }

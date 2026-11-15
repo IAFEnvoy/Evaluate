@@ -16,9 +16,7 @@ import java.util.function.Consumer;
  * All item selection is decoded and matched by Saturn, including third-party entry types.
  */
 public record ItemSelection(List<Entry> entries) implements ItemMatcher {
-    public static final Codec<ItemSelection> CODEC = ENTRIES_CODEC.xmap(ItemSelection::new, ItemSelection::entries)
-            .validate(selection -> selection.entries.isEmpty()
-                    ? DataResult.error(() -> "item must not be empty") : DataResult.success(selection));
+    public static final Codec<ItemSelection> CODEC = ENTRIES_CODEC.xmap(ItemSelection::new, ItemSelection::entries);
 
     public ItemSelection {
         entries = List.copyOf(entries);

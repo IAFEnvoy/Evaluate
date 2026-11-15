@@ -14,31 +14,13 @@ import java.util.function.Consumer;
 /**
  * Per-reload inputs and contributions. Do not retain this context after evaluation.
  */
-public final class EvaluationContext {
-    private final ReloadableServerResources resources;
-    private final ValueGraph<ValueKey> graph;
-    private final Consumer<ItemStack> candidates;
-    private final List<FixedValue> fixedValues;
-    private final Identifier evaluatorId;
-
-    public EvaluationContext(ReloadableServerResources resources, ValueGraph<ValueKey> graph, Consumer<ItemStack> candidates,
-                             List<FixedValue> fixedValues, Identifier evaluatorId) {
-        this.resources = resources;
-        this.graph = graph;
-        this.candidates = candidates;
-        this.fixedValues = fixedValues;
-        this.evaluatorId = evaluatorId;
-    }
-
-    public ReloadableServerResources resources() {
-        return this.resources;
-    }
-
+public record EvaluationContext(ReloadableServerResources resources, ValueGraph<ValueKey> graph,
+                                Consumer<ItemStack> candidates, List<FixedValue> fixedValues, Identifier evaluatorId) {
     /**
      * Register a stack variant so datapack matchers also apply to evaluator inputs and outputs.
      */
-    public ValueKey.Item item(ItemStack stack) {
-        ValueKey.Item key = ValueKey.Item.of(stack);
+    public ValueKey.ItemValue item(ItemStack stack) {
+        ValueKey.ItemValue key = ValueKey.ItemValue.of(stack);
         this.candidates.accept(stack);
         return key;
     }
@@ -46,8 +28,8 @@ public final class EvaluationContext {
     /**
      * Internal keys are scoped to this evaluator's resource id so instances cannot share alternatives accidentally.
      */
-    public ValueKey.Group group(String name) {
-        return new ValueKey.Group("evaluator/" + this.evaluatorId + "/" + name);
+    public ValueKey.GroupValue group(String name) {
+        return new ValueKey.GroupValue("evaluator/" + this.evaluatorId + "/" + name);
     }
 
     /**

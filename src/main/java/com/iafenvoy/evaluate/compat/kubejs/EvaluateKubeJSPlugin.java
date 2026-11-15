@@ -1,5 +1,6 @@
 package com.iafenvoy.evaluate.compat.kubejs;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.iafenvoy.evaluate.api.EvaluationContext;
 import dev.latvian.mods.kubejs.core.ScriptManagerHolderKJS;
@@ -29,7 +30,7 @@ public final class EvaluateKubeJSPlugin implements KubeJSPlugin {
 
     @Override
     public void init() {
-        NeoForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> BINDINGS.clear());
+        NeoForge.EVENT_BUS.addListener((ServerStoppedEvent _) -> BINDINGS.clear());
     }
 
     @Override
@@ -63,7 +64,7 @@ public final class EvaluateKubeJSPlugin implements KubeJSPlugin {
     /**
      * Capture from this resource manager, never from the previous live MinecraftServer.
      */
-    public static Map<Identifier, BiConsumer<EvaluationContext, JsonObject>> callbacks(ResourceManager resources) {
+    public static Map<Identifier, BiConsumer<EvaluationContext, JsonElement>> callbacks(ResourceManager resources) {
         if (resources instanceof ScriptManagerHolderKJS holder && holder.kjs$getScriptManager() != null)
             return bindings(holder.kjs$getScriptManager()).callbacks();
         return Map.of();

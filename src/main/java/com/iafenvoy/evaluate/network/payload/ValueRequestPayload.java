@@ -1,4 +1,4 @@
-package com.iafenvoy.evaluate.network;
+package com.iafenvoy.evaluate.network.payload;
 
 import com.iafenvoy.evaluate.Evaluate;
 import com.iafenvoy.evaluate.api.ItemValues;

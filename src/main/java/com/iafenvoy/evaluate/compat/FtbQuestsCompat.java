@@ -6,7 +6,7 @@ import com.iafenvoy.evaluate.api.ItemValues;
 import com.iafenvoy.evaluate.api.ValueKey;
 import com.iafenvoy.evaluate.data.ValueReloadListener;
 import com.iafenvoy.evaluate.evaluator.FtbQuestsEvaluator;
-import com.iafenvoy.evaluate.network.InvalidateValuesPayload;
+import com.iafenvoy.evaluate.network.payload.InvalidateValuesPayload;
 import com.iafenvoy.evaluate.value.Conversion;
 import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
@@ -34,7 +34,7 @@ import java.util.*;
  * All references to optional FTB classes stay behind the mod-presence check.
  */
 public final class FtbQuestsCompat {
-    private static MinecraftServer dirtyServer;
+    private static boolean dirty;
 
     private FtbQuestsCompat() {
     }
@@ -42,23 +42,23 @@ public final class FtbQuestsCompat {
     public static void init() {
         NeoForge.EVENT_BUS.addListener(FtbQuestsCompat::fileChanged);
         NeoForge.EVENT_BUS.addListener(FtbQuestsCompat::tick);
-        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, (ServerStartedEvent event) -> dirtyServer = null);
-        NeoForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> dirtyServer = null);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, (ServerStartedEvent _) -> dirty = false);
+        NeoForge.EVENT_BUS.addListener((ServerStoppedEvent _) -> dirty = false);
     }
 
     private static void fileChanged(FTBQuestsEvent.ClearFileCache event) {
-        if (event.getEventData().file() instanceof ServerQuestFile file) dirtyServer = file.server;
+        if (event.getEventData().file() instanceof ServerQuestFile) dirty = true;
     }
 
     private static void tick(ServerTickEvent.Post event) {
-        if (dirtyServer != event.getServer() || !ServerQuestFile.exists() || ServerQuestFile.getInstance().isLoading())
-            return;
-        dirtyServer = null;
-        ValueReloadListener listener = event.getServer().getServerResources().managers().getListener(ValueReloadListener.KEY);
+        if (!dirty || !ServerQuestFile.exists() || ServerQuestFile.getInstance().isLoading()) return;
+        dirty = false;
+        MinecraftServer server = event.getServer();
+        ValueReloadListener listener = server.getServerResources().managers().getListener(ValueReloadListener.KEY);
         if (listener.evaluators().listElements().noneMatch(h -> h.value() instanceof FtbQuestsEvaluator)) return;
         listener.invalidate();
-        ItemValues.all(event.getServer());
-        event.getServer().getPlayerList().getPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, InvalidateValuesPayload.INSTANCE));
+        ItemValues.all(server);
+        server.getPlayerList().getPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, InvalidateValuesPayload.INSTANCE));
     }
 
     public static void evaluate(EvaluationContext context, FtbQuestsEvaluator settings) {
@@ -80,7 +80,7 @@ public final class FtbQuestsCompat {
         if ((settings.repeatableOnly() && !quest.canBeRepeated()) || quest.getTasks().isEmpty() || quest.getRewards().isEmpty())
             return 0;
         // Validate the whole exchange before submitting anything to the shared graph.
-        Map<ValueKey.Item, StackAmount> inputs = new LinkedHashMap<>();
+        Map<ValueKey.ItemValue, StackAmount> inputs = new LinkedHashMap<>();
         for (Task task : quest.getTasks()) {
             Json5Object data = new Json5Object();
             task.writeData(data, context.resources().getRegistryLookup());
@@ -97,7 +97,7 @@ public final class FtbQuestsCompat {
             add(inputs, stack, Math.toIntExact(itemTask.getMaxProgress()));
         }
         if (inputs.isEmpty()) return 0;
-        Map<ValueKey.Item, StackAmount> outputs = new LinkedHashMap<>();
+        Map<ValueKey.ItemValue, StackAmount> outputs = new LinkedHashMap<>();
         for (Reward reward : quest.getRewards()) {
             if (reward.getClass() != ItemReward.class) return 0;
             ItemReward itemReward = (ItemReward) reward;
@@ -120,9 +120,9 @@ public final class FtbQuestsCompat {
         return !stack.isEmpty() && !(stack.getItem() instanceof MissingItem);
     }
 
-    private static void add(Map<ValueKey.Item, StackAmount> amounts, ItemStack stack, int amount) {
+    private static void add(Map<ValueKey.ItemValue, StackAmount> amounts, ItemStack stack, int amount) {
         if (amount <= 0) throw new IllegalArgumentException("Exchange amounts must be positive");
-        amounts.merge(ValueKey.Item.of(stack), new StackAmount(stack.copyWithCount(1), amount),
+        amounts.merge(ValueKey.ItemValue.of(stack), new StackAmount(stack.copyWithCount(1), amount),
                 (a, b) -> new StackAmount(a.stack(), Math.addExact(a.amount(), b.amount())));
     }
 

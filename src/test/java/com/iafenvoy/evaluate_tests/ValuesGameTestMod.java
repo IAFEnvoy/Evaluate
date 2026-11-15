@@ -10,8 +10,8 @@ import com.iafenvoy.evaluate.registry.EvaluateResourceKeys;
 import com.iafenvoy.saturn.util.codec.MiscCodecs;
 import com.mojang.serialization.MapCodec;
 import com.iafenvoy.evaluate.value.Conversion;
-import com.iafenvoy.evaluate.network.ValueRequestPayload;
-import com.iafenvoy.evaluate.network.ValueResponsePayload;
+import com.iafenvoy.evaluate.network.payload.ValueRequestPayload;
+import com.iafenvoy.evaluate.network.payload.ValueResponsePayload;
 import io.netty.buffer.Unpooled;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
@@ -110,8 +110,9 @@ public class ValuesGameTestMod {
         KubeJSChecks.checkInitial(helper);
         FtbQuestsChecks.checkInitial(helper);
         CycleRecipeChecks.check(helper);
+        CommandChecks.checkInitial(helper);
         MinecraftServer server = helper.getLevel().getServer();
-        Map<ValueKey.Item, Double> snapshot = ItemValues.all(server);
+        Map<ValueKey.ItemValue, Double> snapshot = ItemValues.all(server);
         Registry<Evaluator> evaluatorRegistry = ItemValues.evaluators(server);
         Registry<ValueOverride> overrideRegistry = ItemValues.overrides(server);
         int previousEvaluations = EVALUATIONS.get();
@@ -148,6 +149,7 @@ public class ValuesGameTestMod {
             KubeJSChecks.checkReloaded(helper);
             FtbQuestsChecks.checkReloaded(helper);
             CycleRecipeChecks.check(helper);
+            CommandChecks.checkReloaded(helper);
         }).thenExecute(() -> FtbQuestsChecks.addQuestReloadChecks(helper));
     }
 
