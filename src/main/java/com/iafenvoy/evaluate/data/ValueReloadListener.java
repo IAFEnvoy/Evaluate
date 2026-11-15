@@ -1,7 +1,6 @@
 package com.iafenvoy.evaluate.data;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.iafenvoy.evaluate.Evaluate;
 import com.iafenvoy.evaluate.api.EvaluationContext;
 import com.iafenvoy.evaluate.api.Evaluator;
@@ -12,6 +11,8 @@ import com.iafenvoy.evaluate.registry.EvaluateResourceKeys;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMaps;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
@@ -45,13 +46,13 @@ public final class ValueReloadListener extends SimplePreparableReloadListener<Va
     private Definitions definitions;
     private boolean pending;
     private ValueSnapshot snapshot = ValueSnapshot.EMPTY;
-    private Map<ValueKey.ItemValue, Double> worldValues = Map.of();
+    private Object2DoubleMap<ValueKey.ItemValue> worldValues = Object2DoubleMaps.emptyMap();
 
     public ValueReloadListener(ReloadableServerResources resources) {
         this.resources = resources;
     }
 
-    public Map<ValueKey.ItemValue, Double> values() {
+    public Object2DoubleMap<ValueKey.ItemValue> values() {
         return this.snapshot().values();
     }
 
@@ -68,7 +69,7 @@ public final class ValueReloadListener extends SimplePreparableReloadListener<Va
     }
 
     public synchronized ValueSnapshot snapshot(MinecraftServer server) {
-        Map<ValueKey.ItemValue, Double> current = WorldValuesData.get(server).values();
+        Object2DoubleMap<ValueKey.ItemValue> current = WorldValuesData.get(server).values();
         if (this.worldValues != current) {
             this.worldValues = current;
             this.pending = true;

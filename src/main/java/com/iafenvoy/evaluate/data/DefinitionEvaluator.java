@@ -4,6 +4,8 @@ import com.iafenvoy.evaluate.Evaluate;
 import com.iafenvoy.evaluate.api.*;
 import com.iafenvoy.evaluate.value.ValueGraph;
 import com.iafenvoy.saturn.util.matcher.ItemMatcher;
+import it.unimi.dsi.fastutil.objects.Object2DoubleLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.ReloadableServerResources;
@@ -20,7 +22,7 @@ final class DefinitionEvaluator {
     private DefinitionEvaluator() {
     }
 
-    static ValueSnapshot evaluate(ReloadableServerResources resources, Map<Identifier, Evaluator> evaluators, List<ValueOverride> overrides, Map<ValueKey.ItemValue, Double> worldValues) {
+    static ValueSnapshot evaluate(ReloadableServerResources resources, Map<Identifier, Evaluator> evaluators, List<ValueOverride> overrides, Object2DoubleMap<ValueKey.ItemValue> worldValues) {
         ValueGraph<ValueKey> graph = new ValueGraph<>();
         Map<ValueKey.ItemValue, ItemStack> candidates = new LinkedHashMap<>();
         Consumer<ItemStack> collect = stack -> {
@@ -32,15 +34,15 @@ final class DefinitionEvaluator {
         overrides.forEach(override -> override.item().collectSamples(collect));
 
         candidates.forEach((key, stack) -> ItemMatcher.find(fixedValues.stream(), stack).ifPresent(d -> graph.setFixed(key, d.value())));
-        worldValues.forEach(graph::setFixed);
-        Map<ValueKey.ItemValue, Double> result = new LinkedHashMap<>();
-        graph.calculate().forEach((key, value) -> {
+        worldValues.forEach((ValueKey.ItemValue key, double value) -> graph.setFixed(key, value));
+        Object2DoubleMap<ValueKey.ItemValue> result = new Object2DoubleLinkedOpenHashMap<>();
+        graph.calculate().forEach((ValueKey key, double value) -> {
             if (key instanceof ValueKey.ItemValue item) result.put(item, value);
         });
         candidates.forEach((key, stack) -> ItemMatcher.find(overrides.stream(), stack).ifPresent(override -> {
             if (worldValues.containsKey(key)) return;
             if (override.value() > 0) result.put(key, override.value());
-            else result.remove(key);
+            else result.removeDouble(key);
         }));
         if (!graph.rejectedCycles().isEmpty())
             Evaluate.LOGGER.warn("Rejected {} nodes in cyclic value groups that exceeded calculation limits", graph.rejectedCycles().size());

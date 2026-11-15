@@ -3,12 +3,12 @@ package com.iafenvoy.evaluate.api;
 import com.iafenvoy.evaluate.value.Conversion;
 import com.iafenvoy.evaluate.value.ValueGraph;
 import com.iafenvoy.saturn.util.matcher.ItemMatcher;
+import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -43,7 +43,7 @@ public record EvaluationContext(ReloadableServerResources resources, ValueGraph<
      * Add an unlocked candidate; the lowest candidate wins, and explicit datapack values take precedence.
      */
     public void addValue(ItemStack stack, double value) {
-        this.addConversion(new Conversion<>(1, this.item(stack), Map.of(), value));
+        this.addConversion(new Conversion<>(1, this.item(stack), Object2IntMaps.emptyMap(), value));
     }
 
     /**

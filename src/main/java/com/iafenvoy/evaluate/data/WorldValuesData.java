@@ -6,6 +6,7 @@ import com.iafenvoy.saturn.util.codec.MiscCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMaps;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -21,15 +22,16 @@ import java.util.List;
 public final class WorldValuesData extends SavedData {
     private static final Codec<WorldValuesData> CODEC = Entry.CODEC.listOf().fieldOf("values").xmap(WorldValuesData::new, data -> data.values.object2DoubleEntrySet().stream().map(Entry::new).toList()).codec();
     public static final SavedDataType<WorldValuesData> TYPE = new SavedDataType<>(Identifier.fromNamespaceAndPath(Evaluate.MOD_ID, "values"), WorldValuesData::new, CODEC);
-    private final Object2DoubleMap<ValueKey.ItemValue> values;
+    private Object2DoubleMap<ValueKey.ItemValue> values;
 
     public WorldValuesData() {
         this(List.of());
     }
 
     private WorldValuesData(List<Entry> entries) {
-        this.values = new Object2DoubleOpenHashMap<>();
-        entries.forEach(entry -> this.values.put(entry.item(), entry.value()));
+        Object2DoubleMap<ValueKey.ItemValue> values = new Object2DoubleOpenHashMap<>();
+        entries.forEach(entry -> values.put(entry.item(), entry.value()));
+        this.values = Object2DoubleMaps.unmodifiable(values);
     }
 
     public static WorldValuesData get(MinecraftServer server) {
@@ -45,7 +47,9 @@ public final class WorldValuesData extends SavedData {
             throw new IllegalArgumentException("Value must be finite and non-negative");
         ValueKey.ItemValue key = ValueKey.ItemValue.of(stack);
         if (this.values.containsKey(key) && value == this.values.getDouble(key)) return false;
-        this.values.put(key, value);
+        Object2DoubleMap<ValueKey.ItemValue> values = new Object2DoubleOpenHashMap<>(this.values);
+        values.put(key, value);
+        this.values = Object2DoubleMaps.unmodifiable(values);
         this.setDirty();
         return true;
     }
@@ -53,7 +57,9 @@ public final class WorldValuesData extends SavedData {
     public boolean remove(ItemStack stack) {
         ValueKey.ItemValue key = ValueKey.ItemValue.of(stack);
         if (!this.values.containsKey(key)) return false;
-        this.values.removeDouble(key);
+        Object2DoubleMap<ValueKey.ItemValue> values = new Object2DoubleOpenHashMap<>(this.values);
+        values.removeDouble(key);
+        this.values = Object2DoubleMaps.unmodifiable(values);
         this.setDirty();
         return true;
     }

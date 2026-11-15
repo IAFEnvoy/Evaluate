@@ -1,12 +1,12 @@
 package com.iafenvoy.evaluate.api;
 
 import com.iafenvoy.evaluate.data.ValueReloadListener;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import net.minecraft.core.Registry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.Map;
 import java.util.OptionalDouble;
 
 /**
@@ -16,7 +16,7 @@ public final class ItemValues {
     private ItemValues() {
     }
 
-    public static Map<ValueKey.ItemValue, Double> all(MinecraftServer server) {
+    public static Object2DoubleMap<ValueKey.ItemValue> all(MinecraftServer server) {
         return server.getServerResources().managers().getListener(ValueReloadListener.KEY).snapshot(server).values();
     }
 

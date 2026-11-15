@@ -31,7 +31,7 @@ final class KubeJSChecks {
         checkValue(helper, Items.TRIAL_SPAWNER, 999.5);
         checkValue(helper, Items.DEBUG_STICK, 15); // (10.5 + 18.25 + 1.25) / 2, final override excluded.
         Evaluator evaluator = ItemValues.evaluators(helper.getLevel().getServer()).getValue(Identifier.fromNamespaceAndPath("evaluate_tests", "params"));
-        helper.assertTrue(evaluator instanceof JsEvaluator js && js.params().get("value").getAsDouble() == 31.5,
+        helper.assertTrue(evaluator instanceof JsEvaluator js && js.params().getAsJsonObject().get("value").getAsDouble() == 31.5,
                 "JS callbacks must not mutate registry params");
     }
 

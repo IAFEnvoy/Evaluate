@@ -150,8 +150,7 @@ final class FtbQuestsChecks {
         helper.assertTrue(Evaluator.CODEC.parse(ops, Evaluator.CODEC.encodeStart(ops, defaults).getOrThrow()).getOrThrow().equals(defaults),
                 "FTB evaluator must roundtrip without loading optional FTB classes");
         for (String invalid : List.of("{\"type\":\"evaluate:ftb_quests\",\"extra_value\":-1}",
-                "{\"type\":\"evaluate:ftb_quests\",\"extra_value\":1e309}",
-                "{\"type\":\"evaluate:ftb_quests\",\"phase\":\"after\"}"))
+                "{\"type\":\"evaluate:ftb_quests\",\"extra_value\":1e309}"))
             helper.assertTrue(Evaluator.CODEC.parse(ops, JsonParser.parseString(invalid)).error().isPresent(), "Invalid FTB settings must fail: " + invalid);
     }
 

@@ -2,6 +2,7 @@ package com.iafenvoy.evaluate_tests;
 
 import com.iafenvoy.evaluate.value.Conversion;
 import com.iafenvoy.evaluate.value.ValueGraph;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +14,22 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ValueGraphTest {
     private static final double TOLERANCE = 1.0E-12;
+
+    @Test
+    void conversionsKeepAnImmutableCopyOfPrimitiveCounts() {
+        Object2IntLinkedOpenHashMap<String> ingredients = new Object2IntLinkedOpenHashMap<>();
+        ingredients.put("source", 2);
+        ingredients.put("unused", 0);
+        Conversion<String> conversion = new Conversion<>(1, "output", ingredients);
+        ingredients.put("source", 100);
+        assertEquals(2, conversion.ingredients().getInt("source"));
+        assertFalse(conversion.ingredients().containsKey("unused"));
+        assertThrows(UnsupportedOperationException.class, () -> conversion.ingredients().put("source", 3));
+        ValueGraph<String> graph = new ValueGraph<>();
+        graph.setFixed("source", 1.25);
+        graph.add(conversion);
+        assertEquals(2.5, graph.calculate().getDouble("output"));
+    }
 
     @Test
     void propagatesCountsAndChoosesCheapestKnownAlternative() {

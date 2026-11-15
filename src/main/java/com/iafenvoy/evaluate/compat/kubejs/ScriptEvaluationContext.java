@@ -9,12 +9,12 @@ import com.iafenvoy.evaluate.value.Conversion;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.kubejs.util.JsonUtils;
 import dev.latvian.mods.rhino.Context;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Script-friendly contributions to the same graph used by recipes and Java evaluators.
@@ -43,10 +43,10 @@ public record ScriptEvaluationContext(EvaluationContext context) {
      */
     public void conversion(ItemStack output, List<ItemStack> ingredients, double extraValue) {
         if (output.isEmpty()) throw new IllegalArgumentException("Output must not be empty");
-        Map<ValueKey, Integer> inputs = new LinkedHashMap<>();
+        Object2IntMap<ValueKey> inputs = new Object2IntLinkedOpenHashMap<>();
         for (ItemStack ingredient : ingredients) {
             if (ingredient.isEmpty()) throw new IllegalArgumentException("Ingredient must not be empty");
-            inputs.merge(this.context.item(ingredient), ingredient.getCount(), Math::addExact);
+            inputs.mergeInt(this.context.item(ingredient), ingredient.getCount(), Math::addExact);
         }
         this.context.addConversion(new Conversion<>(output.getCount(), this.context.item(output), inputs, extraValue));
     }

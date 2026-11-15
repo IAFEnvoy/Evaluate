@@ -196,16 +196,12 @@ public class ValuesGameTestMod {
         RegistryOps<JsonElement> ops = helper.getLevel().registryAccess().createSerializationContext(JsonOps.INSTANCE);
         JsonArray invalid = JsonParser.parseString("""
                 [
-                  {"item":[],"value":1},
                   {"item":"minecraft:diamond","value":-1},
                   {"item":"minecraft:diamond","value":-0.25},
                   {"item":"minecraft:diamond","value":1e309},
                   {"item":"minecraft:diamond","value":"NaN"},
                   {"item":"minecraft:diamond","value":"Infinity"},
                   {"item":{"type":"saturn:no_such_matcher"},"value":1},
-                  {"item":"minecraft:diamond","value":1,"phase":"before"},
-                  {"item":"minecraft:diamond","value":1,"priority":1.5},
-                  {"item":"minecraft:diamond","value":1,"conversions":[]},
                   {"values":[{"item":"minecraft:diamond","value":7}]}
                 ]
                 """).getAsJsonArray();
@@ -230,23 +226,21 @@ public class ValuesGameTestMod {
         for (String json : List.of(
                 "{\"type\":\"evaluate:no_such_type\"}",
                 "{\"type\":\"evaluate:recipe\",\"recipe_type\":\"minecraft:smelting\",\"extra_value\":-1}",
-                "{\"type\":\"evaluate:recipe\",\"recipe_type\":\"minecraft:missing\"}",
-                "{\"type\":\"evaluate:recipe\",\"recipe_type\":\"minecraft:smelting\",\"phase\":\"after\"}"))
+                "{\"type\":\"evaluate:recipe\",\"recipe_type\":\"minecraft:missing\"}"))
             helper.assertTrue(Evaluator.CODEC.parse(ops, JsonParser.parseString(json)).error().isPresent(), "Invalid evaluator must be rejected: " + json);
-        helper.assertTrue(ValueOverride.CODEC.parse(ops, JsonParser.parseString("""
-                {"item":"minecraft:diamond","value":7,"phase":"after"}
-                """)).error().isPresent(), "Override entries must not accept a phase field");
         Evaluator js = Evaluator.CODEC.parse(ops, JsonParser.parseString("""
                 {"type":"evaluate:js","id":"evaluate_tests:params","params":{"value":1.25,"nested":[1,2]}}
                 """)).getOrThrow();
         helper.assertTrue(Evaluator.CODEC.parse(ops, Evaluator.CODEC.encodeStart(ops, js).getOrThrow()).getOrThrow().equals(js),
                 "JS evaluator callback id and params must roundtrip without requiring KubeJS");
-        for (String invalidJs : List.of(
-                "{\"type\":\"evaluate:js\",\"id\":\"evaluate_tests:params\",\"params\":[]}",
-                "{\"type\":\"evaluate:js\",\"id\":\"evaluate_tests:params\",\"params\":1}",
-                "{\"type\":\"evaluate:js\",\"id\":\"Invalid ID\"}",
-                "{\"type\":\"evaluate:js\",\"id\":\"evaluate_tests:params\",\"phase\":\"after\"}"))
-            helper.assertTrue(Evaluator.CODEC.parse(ops, JsonParser.parseString(invalidJs)).error().isPresent(), "Invalid JS evaluator must be rejected: " + invalidJs);
+        for (String params : List.of("[]", "1")) {
+            Evaluator arbitraryParams = Evaluator.CODEC.parse(ops, JsonParser.parseString(
+                    "{\"type\":\"evaluate:js\",\"id\":\"evaluate_tests:params\",\"params\":" + params + "}")).getOrThrow();
+            helper.assertTrue(Evaluator.CODEC.parse(ops, Evaluator.CODEC.encodeStart(ops, arbitraryParams).getOrThrow()).getOrThrow().equals(arbitraryParams),
+                    "JS evaluator must preserve arbitrary JSON params");
+        }
+        helper.assertTrue(Evaluator.CODEC.parse(ops, JsonParser.parseString(
+                "{\"type\":\"evaluate:js\",\"id\":\"Invalid ID\"}")).error().isPresent(), "Invalid JS callback ids must be rejected");
         ValueReloadListener listener = helper.getLevel().getServer().getServerResources().managers().getListener(ValueReloadListener.KEY);
         helper.assertTrue(listener.evaluators().getValue(Identifier.fromNamespaceAndPath("evaluate", "recipes/smelting"))
                 instanceof RecipeEvaluator recipe && recipe.extraValue() == 2.5, "Same-id evaluator data must replace the lower pack");

@@ -19,6 +19,8 @@ import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.EventPriority;
@@ -109,7 +111,7 @@ public final class FtbQuestsCompat {
             // FTB's separate reward count replaces the count stored inside its item stack.
             add(outputs, itemReward.getItem(), itemReward.getCount());
         }
-        Map<ValueKey, Integer> costs = new LinkedHashMap<>();
+        Object2IntMap<ValueKey> costs = new Object2IntLinkedOpenHashMap<>();
         inputs.values().forEach(input -> costs.put(context.item(input.stack()), input.amount()));
         // Charge the entire input cost for each distinct output: no arbitrary splitting or byproduct credits.
         outputs.values().forEach(output -> context.addConversion(new Conversion<>(output.amount(), context.item(output.stack()), costs, settings.extraValue())));

@@ -4,31 +4,36 @@ import com.iafenvoy.evaluate.api.FixedValue;
 import com.iafenvoy.evaluate.api.ValueKey;
 import com.iafenvoy.evaluate.api.ValueOverride;
 import com.iafenvoy.saturn.util.matcher.ItemMatcher;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMaps;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
 /**
  * Keep stack-sensitive declarations live instead of caching their answer by item id.
  */
-public record ValueSnapshot(Map<ValueKey.ItemValue, Double> values, List<FixedValue> fixedValues,
-                            List<ValueOverride> overrides, Map<ValueKey.ItemValue, Double> worldValues) {
-    public static final ValueSnapshot EMPTY = new ValueSnapshot(Map.of(), List.of(), List.of(), Map.of());
+public record ValueSnapshot(Object2DoubleMap<ValueKey.ItemValue> values, List<FixedValue> fixedValues,
+                            List<ValueOverride> overrides, Object2DoubleMap<ValueKey.ItemValue> worldValues) {
+    public static final ValueSnapshot EMPTY = new ValueSnapshot(Object2DoubleMaps.emptyMap(), List.of(), List.of(), Object2DoubleMaps.emptyMap());
 
     public ValueSnapshot {
-        values = Map.copyOf(values);
+        values = Object2DoubleMaps.unmodifiable(new Object2DoubleOpenHashMap<>(values));
         overrides = List.copyOf(overrides);
         fixedValues = List.copyOf(fixedValues);
-        worldValues = Map.copyOf(worldValues);
+        worldValues = Object2DoubleMaps.unmodifiable(new Object2DoubleOpenHashMap<>(worldValues));
     }
 
     public OptionalDouble get(ItemStack stack) {
         if (stack.isEmpty()) return OptionalDouble.empty();
-        Double worldValue = this.worldValues.get(ValueKey.ItemValue.of(stack));
-        if (worldValue != null) return worldValue > 0 ? OptionalDouble.of(worldValue) : OptionalDouble.empty();
+        ValueKey.ItemValue key = ValueKey.ItemValue.of(stack);
+        if (this.worldValues.containsKey(key)) {
+            double worldValue = this.worldValues.getDouble(key);
+            return worldValue > 0 ? OptionalDouble.of(worldValue) : OptionalDouble.empty();
+        }
         Optional<ValueOverride> override = ItemMatcher.find(this.overrides.stream(), stack);
         if (override.isPresent())
             return override.get().value() > 0 ? OptionalDouble.of(override.get().value()) : OptionalDouble.empty();
@@ -37,7 +42,6 @@ public record ValueSnapshot(Map<ValueKey.ItemValue, Double> values, List<FixedVa
             double value = explicit.get().value();
             return value > 0 ? OptionalDouble.of(value) : OptionalDouble.empty();
         }
-        Double value = this.values.get(ValueKey.ItemValue.of(stack));
-        return value == null ? OptionalDouble.empty() : OptionalDouble.of(value);
+        return this.values.containsKey(key) ? OptionalDouble.of(this.values.getDouble(key)) : OptionalDouble.empty();
     }
 }

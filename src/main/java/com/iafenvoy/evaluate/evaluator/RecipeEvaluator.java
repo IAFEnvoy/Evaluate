@@ -8,6 +8,8 @@ import com.iafenvoy.evaluate.value.Conversion;
 import com.iafenvoy.saturn.util.codec.MiscCodecs;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
@@ -16,9 +18,7 @@ import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Explicitly maps recipes whose input quantities and static outputs are known.
@@ -51,7 +51,7 @@ public record RecipeEvaluator(RecipeType<?> recipeType, double extraValue) imple
                             ? shapeless.ingredients().size() : ingredients.size();
                     if (inputs > ingredients.size()) continue;
                     String id = holder.id().identifier() + "/" + variant++;
-                    Map<ValueKey, Integer> costs = new LinkedHashMap<>();
+                    Object2IntMap<ValueKey> costs = new Object2IntLinkedOpenHashMap<>();
                     boolean valid = true;
                     for (int slot = 0; slot < inputs; slot++) {
                         Ingredient ingredient = ingredients.get(slot);
@@ -63,18 +63,18 @@ public record RecipeEvaluator(RecipeType<?> recipeType, double extraValue) imple
                         // Each alternative has its own container refund before taking the minimum.
                         ValueKey group = context.group("recipe/" + id + "/ingredient/" + slot);
                         for (ItemStack stack : alternatives) {
-                            Map<ValueKey, Integer> netCost = new LinkedHashMap<>();
+                            Object2IntMap<ValueKey> netCost = new Object2IntLinkedOpenHashMap<>();
                             netCost.put(context.item(stack), 1);
                             ItemStackTemplate remainder = stack.getCraftingRemainder();
                             if (remainder != null) {
                                 ItemStack returned = remainder.create();
-                                netCost.merge(context.item(returned), -returned.getCount(), Math::addExact);
+                                netCost.mergeInt(context.item(returned), -returned.getCount(), Math::addExact);
                             }
                             if (alternatives.size() == 1)
-                                netCost.forEach((key, amount) -> costs.merge(key, amount, Math::addExact));
+                                netCost.forEach((ValueKey key, int amount) -> costs.mergeInt(key, amount, Math::addExact));
                             else context.addConversion(new Conversion<>(1, group, netCost));
                         }
-                        if (alternatives.size() > 1) costs.merge(group, 1, Math::addExact);
+                        if (alternatives.size() > 1) costs.mergeInt(group, 1, Math::addExact);
                     }
                     if (valid) {
                         ItemStack output = stack1.create();

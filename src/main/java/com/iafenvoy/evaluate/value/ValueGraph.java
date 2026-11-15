@@ -1,5 +1,11 @@
 package com.iafenvoy.evaluate.value;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.SetMultimap;
+import it.unimi.dsi.fastutil.objects.*;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.*;
@@ -12,7 +18,7 @@ public final class ValueGraph<K> {
     private static final BigDecimal CYCLE_TOLERANCE = BigDecimal.valueOf(8 * Math.ulp(1.0));
     private static final int MAX_CYCLE_UPDATES = 256;
     private static final int MAX_CYCLE_WORK = 1_000_000;
-    private final Map<K, Double> fixed = new LinkedHashMap<>();
+    private final Object2DoubleMap<K> fixed = new Object2DoubleLinkedOpenHashMap<>();
     private final List<Conversion<K>> conversions = new ArrayList<>();
     private final Set<K> rejectedCycles = new LinkedHashSet<>();
 
@@ -34,13 +40,13 @@ public final class ValueGraph<K> {
         return Set.copyOf(this.rejectedCycles);
     }
 
-    public Map<K, Double> calculate() {
+    public Object2DoubleMap<K> calculate() {
         this.rejectedCycles.clear();
-        Map<K, List<Conversion<K>>> byOutput = new LinkedHashMap<>();
+        ListMultimap<K, Conversion<K>> byOutput = MultimapBuilder.linkedHashKeys().arrayListValues().build();
         for (Conversion<K> conversion : this.conversions)
             if (!this.fixed.containsKey(conversion.output()))
-                byOutput.computeIfAbsent(conversion.output(), k -> new ArrayList<>()).add(conversion);
-        Map<K, Double> values = new LinkedHashMap<>(this.fixed);
+                byOutput.put(conversion.output(), conversion);
+        Object2DoubleMap<K> values = new Object2DoubleLinkedOpenHashMap<>(this.fixed);
         for (Set<K> component : this.components(byOutput)) {
             K first = component.iterator().next();
             boolean cyclic = component.size() > 1 || byOutput.get(first).stream().anyMatch(c -> c.ingredients().containsKey(first));
@@ -48,35 +54,34 @@ public final class ValueGraph<K> {
                 // Publish a component only after it settles, so rejected values cannot contaminate descendants.
                 if (!this.calculateCycle(component, byOutput, values)) this.rejectedCycles.addAll(component);
             } else {
-                Double minimum = null;
+                double minimum = Double.POSITIVE_INFINITY;
                 for (Conversion<K> conversion : byOutput.get(first)) {
-                    Double candidate = this.cost(conversion, values);
-                    if (candidate != null && (minimum == null || candidate < minimum)) minimum = candidate;
+                    double candidate = this.cost(conversion, values);
+                    if (candidate < minimum) minimum = candidate;
                 }
-                if (minimum != null) values.put(first, minimum);
+                if (Double.isFinite(minimum)) values.put(first, minimum);
             }
         }
-        Map<K, Double> result = new LinkedHashMap<>();
-        values.forEach((key, value) -> {
-            if (Double.isFinite(value) && value > 0) result.put(key, value);
-        });
-        return Map.copyOf(result);
+        Object2DoubleMap<K> result = new Object2DoubleLinkedOpenHashMap<>();
+        for (Object2DoubleMap.Entry<K> entry : values.object2DoubleEntrySet()) {
+            double value = entry.getDoubleValue();
+            if (Double.isFinite(value) && value > 0) result.put(entry.getKey(), value);
+        }
+        return Object2DoubleMaps.unmodifiable(result);
     }
 
     /**
      * Iterative Kosaraju traversal, returning strongly connected components with dependencies first.
      */
-    private List<Set<K>> components(Map<K, List<Conversion<K>>> byOutput) {
-        Map<K, Set<K>> dependencies = new LinkedHashMap<>();
-        Map<K, Set<K>> dependents = new HashMap<>();
-        byOutput.forEach((output, recipes) -> {
-            Set<K> inputs = new LinkedHashSet<>();
-            recipes.forEach(c -> c.ingredients().keySet().forEach(input -> {
-                if (byOutput.containsKey(input)) inputs.add(input);
-            }));
-            dependencies.put(output, inputs);
-            inputs.forEach(input -> dependents.computeIfAbsent(input, k -> new LinkedHashSet<>()).add(output));
-        });
+    private List<Set<K>> components(ListMultimap<K, Conversion<K>> byOutput) {
+        SetMultimap<K, K> dependencies = LinkedHashMultimap.create();
+        SetMultimap<K, K> dependents = LinkedHashMultimap.create();
+        byOutput.forEach((output, recipe) -> recipe.ingredients().keySet().forEach(input -> {
+            if (byOutput.containsKey(input)) {
+                dependencies.put(output, input);
+                dependents.put(input, output);
+            }
+        }));
         List<K> finished = new ArrayList<>();
         Set<K> visited = new HashSet<>();
         ArrayDeque<Traversal<K>> traversal = new ArrayDeque<>();
@@ -102,7 +107,7 @@ public final class ValueGraph<K> {
             while (!pending.isEmpty()) {
                 K key = pending.pop();
                 component.add(key);
-                for (K dependent : dependents.getOrDefault(key, Set.of()))
+                for (K dependent : dependents.get(key))
                     if (visited.add(dependent)) pending.push(dependent);
             }
             components.add(component);
@@ -111,20 +116,20 @@ public final class ValueGraph<K> {
         return components;
     }
 
-    private boolean calculateCycle(Set<K> component, Map<K, List<Conversion<K>>> byOutput, Map<K, Double> values) {
+    private boolean calculateCycle(Set<K> component, ListMultimap<K, Conversion<K>> byOutput, Object2DoubleMap<K> values) {
         // Extended exponent range is needed only inside cycles: double underflow must never look like convergence.
         // Public values, fixed values, and acyclic calculations remain doubles.
         Map<K, BigDecimal> working = new HashMap<>();
-        Map<K, Set<K>> dependents = new HashMap<>();
+        SetMultimap<K, K> dependents = LinkedHashMultimap.create();
         for (K output : component)
             for (Conversion<K> conversion : byOutput.get(output))
                 for (K input : conversion.ingredients().keySet()) {
                     if (component.contains(input))
-                        dependents.computeIfAbsent(input, k -> new LinkedHashSet<>()).add(output);
+                        dependents.put(input, output);
                     else if (values.containsKey(input))
-                        working.computeIfAbsent(input, k -> BigDecimal.valueOf(values.get(k)));
+                        working.computeIfAbsent(input, k -> BigDecimal.valueOf(values.getDouble(k)));
                 }
-        Map<K, Integer> updates = new HashMap<>();
+        Object2IntOpenHashMap<K> updates = new Object2IntOpenHashMap<>();
         ArrayDeque<K> queue = new ArrayDeque<>(component);
         Set<K> queued = new HashSet<>(component);
         int updateLimit = (int) Math.max(64, Math.min(MAX_CYCLE_UPDATES, component.size() * 2L));
@@ -141,9 +146,9 @@ public final class ValueGraph<K> {
             }
             BigDecimal old = working.get(output);
             if (minimum == null || old != null && !improves(minimum, old)) continue;
-            if (updates.merge(output, 1, Integer::sum) > updateLimit) return false;
+            if (updates.addTo(output, 1) >= updateLimit) return false;
             working.put(output, minimum);
-            enqueue(dependents.getOrDefault(output, Set.of()), queue, queued);
+            enqueue(dependents.get(output), queue, queued);
         }
         for (K output : component) {
             BigDecimal value = working.get(output);
@@ -170,14 +175,14 @@ public final class ValueGraph<K> {
         BigDecimal total = BigDecimal.valueOf(conversion.cost());
         boolean allFree = total.signum() == 0;
         boolean positiveInput = total.signum() > 0;
-        for (Map.Entry<K, Integer> ingredient : conversion.ingredients().entrySet()) {
+        for (Object2IntMap.Entry<K> ingredient : conversion.ingredients().object2IntEntrySet()) {
             BigDecimal value = values.get(ingredient.getKey());
             if (value == null) return null;
             if (value.signum() > 0) {
                 allFree = false;
-                if (ingredient.getValue() > 0) positiveInput = true;
+                if (ingredient.getIntValue() > 0) positiveInput = true;
             }
-            total = total.add(value.multiply(BigDecimal.valueOf(ingredient.getValue()), CYCLE_PRECISION), CYCLE_PRECISION);
+            total = total.add(value.multiply(BigDecimal.valueOf(ingredient.getIntValue()), CYCLE_PRECISION), CYCLE_PRECISION);
         }
         if (allFree || positiveInput && total.signum() <= 0) return BigDecimal.ZERO;
         if (total.signum() <= 0) return null;
@@ -185,24 +190,24 @@ public final class ValueGraph<K> {
         return Double.isFinite(result.doubleValue()) ? result : null;
     }
 
-    private Double cost(Conversion<K> conversion, Map<K, Double> values) {
+    private double cost(Conversion<K> conversion, Object2DoubleMap<K> values) {
         double total = conversion.cost();
         boolean allFree = total == 0;
         boolean positiveInput = total > 0;
-        for (Map.Entry<K, Integer> ingredient : conversion.ingredients().entrySet()) {
-            Double value = values.get(ingredient.getKey());
-            if (value == null) return null; // Unknown is never treated as a free ingredient.
+        for (Object2IntMap.Entry<K> ingredient : conversion.ingredients().object2IntEntrySet()) {
+            double value = values.getOrDefault(ingredient.getKey(), Double.NaN);
+            if (Double.isNaN(value)) return Double.NaN; // Unknown is never treated as a free ingredient.
             if (value > 0) {
                 allFree = false;
-                if (ingredient.getValue() > 0) positiveInput = true;
+                if (ingredient.getIntValue() > 0) positiveInput = true;
             }
-            total = Math.fma(value, ingredient.getValue(), total);
+            total = Math.fma(value, ingredient.getIntValue(), total);
         }
-        if (!Double.isFinite(total)) return null;
+        if (!Double.isFinite(total)) return Double.NaN;
         if (allFree || positiveInput && total <= 0) return 0.0;
         double result = total / conversion.count();
         // Overflow and positive costs below the double range must not propagate as infinity or free items.
-        return result > 0 && Double.isFinite(result) ? result : null;
+        return result > 0 && Double.isFinite(result) ? result : Double.NaN;
     }
 
     private record Traversal<K>(K key, Iterator<K> inputs) {

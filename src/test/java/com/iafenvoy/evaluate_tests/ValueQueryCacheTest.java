@@ -39,4 +39,39 @@ class ValueQueryCacheTest {
         assertEquals(20.5, cache.get("item", requests::add).orElseThrow());
         assertEquals(2, requests.size());
     }
+
+    @Test
+    void evictsLeastRecentlyUsedAnswersIncludingUnknowns() {
+        ValueQueryCache<Integer> cache = new ValueQueryCache<>();
+        List<Integer> requests = new ArrayList<>();
+        for (int key = 0; key < 1024; key++) {
+            cache.get(key, requests::add);
+            cache.receive(requests.getLast(), key == 0 ? 0 : key + 0.5);
+        }
+        assertTrue(cache.get(0, requests::add).isEmpty()); // Reading an unknown answer also refreshes its age.
+        cache.get(1024, requests::add);
+        cache.receive(requests.getLast(), 1024.5);
+        assertTrue(cache.get(0, requests::add).isEmpty());
+        assertEquals(2.5, cache.get(2, requests::add).orElseThrow());
+        assertEquals(1025, requests.size());
+        assertTrue(cache.get(1, requests::add).isEmpty());
+        assertEquals(1026, requests.size());
+    }
+
+    @Test
+    void boundsPendingRequestsAndAcceptsNewOnesAfterAReply() {
+        ValueQueryCache<Integer> cache = new ValueQueryCache<>();
+        List<Integer> requests = new ArrayList<>();
+        for (int key = 0; key < 65; key++) cache.get(key, requests::add);
+        assertEquals(64, requests.size());
+        cache.get(0, requests::add);
+        assertEquals(64, requests.size());
+        cache.receive(requests.getFirst(), Double.NaN);
+        assertTrue(cache.get(0, requests::add).isEmpty());
+        assertEquals(64, requests.size()); // Invalid answers are cached as unknown.
+        cache.get(64, requests::add);
+        assertEquals(65, requests.size());
+        cache.receive(requests.getLast(), 0.25);
+        assertEquals(0.25, cache.get(64, requests::add).orElseThrow());
+    }
 }
