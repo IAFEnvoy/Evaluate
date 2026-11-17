@@ -121,10 +121,6 @@ dependencies {
         runtimeOnly "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
         runtimeOnly "dev.ftb.mods:ftb-teams-neoforge:${ftb_teams_version}"
     }
-
-    testImplementation platform('org.junit:junit-bom:5.11.4')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test', Test) {

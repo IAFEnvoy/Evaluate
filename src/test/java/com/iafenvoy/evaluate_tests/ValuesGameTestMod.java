@@ -110,6 +110,7 @@ public class ValuesGameTestMod {
         KubeJSChecks.checkInitial(helper);
         FtbQuestsChecks.checkInitial(helper);
         CycleRecipeChecks.check(helper);
+        SaturnChecks.checkInitial(helper);
         CommandChecks.checkInitial(helper);
         MinecraftServer server = helper.getLevel().getServer();
         Map<ValueKey.ItemValue, Double> snapshot = ItemValues.all(server);
@@ -149,6 +150,7 @@ public class ValuesGameTestMod {
             KubeJSChecks.checkReloaded(helper);
             FtbQuestsChecks.checkReloaded(helper);
             CycleRecipeChecks.check(helper);
+            SaturnChecks.checkReloaded(helper);
             CommandChecks.checkReloaded(helper);
         }).thenExecute(() -> FtbQuestsChecks.addQuestReloadChecks(helper));
     }

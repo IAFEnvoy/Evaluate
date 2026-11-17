@@ -4,7 +4,10 @@ import com.iafenvoy.evaluate.api.ItemValues;
 import com.iafenvoy.evaluate.compat.FtbQuestsCompat;
 import com.iafenvoy.evaluate.data.ValueReloadListener;
 import com.iafenvoy.evaluate.network.payload.InvalidateValuesPayload;
+import com.iafenvoy.evaluate.registry.EvaluateEntityConditions;
 import com.iafenvoy.evaluate.registry.EvaluateEvaluators;
+import com.iafenvoy.evaluate.registry.EvaluateItemActions;
+import com.iafenvoy.evaluate.registry.EvaluateItemConditions;
 import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -27,6 +30,9 @@ public class Evaluate {
 
     public Evaluate(IEventBus bus) {
         EvaluateEvaluators.REGISTRY.register(bus);
+        EvaluateItemActions.REGISTRY.register(bus);
+        EvaluateItemConditions.REGISTRY.register(bus);
+        EvaluateEntityConditions.REGISTRY.register(bus);
         // FTB Quests loads its server quest file at normal priority in this same event.
         if (ModList.get().isLoaded("ftbquests")) FtbQuestsCompat.init();
     }

@@ -34,7 +34,7 @@ final class DefinitionEvaluator {
         overrides.forEach(override -> override.item().collectSamples(collect));
 
         candidates.forEach((key, stack) -> ItemMatcher.find(fixedValues.stream(), stack).ifPresent(d -> graph.setFixed(key, d.value())));
-        worldValues.forEach((ValueKey.ItemValue key, double value) -> graph.setFixed(key, value));
+        worldValues.forEach(graph::setFixed);
         Object2DoubleMap<ValueKey.ItemValue> result = new Object2DoubleLinkedOpenHashMap<>();
         graph.calculate().forEach((ValueKey key, double value) -> {
             if (key instanceof ValueKey.ItemValue item) result.put(item, value);

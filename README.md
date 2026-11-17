@@ -9,6 +9,7 @@ A data-driven NeoForge mod and API for calculating relative item values.
 - Optional FTB Quests inference from item-consuming exchanges.
 - KubeJS scripting and custom Java evaluators.
 - Component-aware item matching powered by Saturn.
+- Saturn actions for world values and conditions for item and inventory value comparisons.
 - Item value tooltips with **F3+H**.
 - Cheat-only `/evaluate set <item> <value>` and `/evaluate reset <item>` commands, saved per world.
 - Cached results, `/reload` support, and cycle protection.

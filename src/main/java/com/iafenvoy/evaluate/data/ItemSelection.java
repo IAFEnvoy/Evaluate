@@ -3,7 +3,6 @@ package com.iafenvoy.evaluate.data;
 import com.iafenvoy.saturn.util.matcher.ItemMatcher;
 import com.iafenvoy.saturn.util.matcher.builtin.IngredientEntry;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;

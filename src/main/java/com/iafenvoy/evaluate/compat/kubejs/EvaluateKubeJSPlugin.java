@@ -1,7 +1,6 @@
 package com.iafenvoy.evaluate.compat.kubejs;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.iafenvoy.evaluate.api.EvaluationContext;
 import dev.latvian.mods.kubejs.core.ScriptManagerHolderKJS;
 import dev.latvian.mods.kubejs.event.EventGroup;
