@@ -21,10 +21,7 @@ sourceSets.main.resources {
 repositories {
     mavenCentral()
     maven { url = "https://cursemaven.com" }
-    exclusiveContent {
-        forRepository { maven { url = "https://maven.latvian.dev/releases" } }
-        filter { includeGroup 'dev.latvian.mods' }
-    }
+    maven { url = "https://maven.latvian.dev/releases" }
     maven { url = 'https://maven.ftb.dev/releases' }
     maven { url = "https://maven.blamejared.com/" }
 }
@@ -123,8 +120,9 @@ dependencies {
     }
 }
 
+// Integration tests run through runGameTestServer instead of JUnit.
 tasks.named('test', Test) {
-    useJUnitPlatform()
+    enabled = false
 }
 
 if (providers.gradleProperty('testKubeJS').map { it.toBoolean() }.getOrElse(false)) {
